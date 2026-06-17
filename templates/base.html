@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}酒店预订数据分析平台{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background-color: #f5f7fa; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .navbar-brand { font-weight: 700; font-size: 1.25rem; }
+        .nav-link { font-size: 0.95rem; padding: 0.5rem 1rem !important; border-radius: 6px; margin: 0 2px; transition: background-color 0.2s; }
+        .nav-link:hover, .nav-link.active { background-color: rgba(255,255,255,0.12); }
+        footer { margin-top: 60px; }
+        .card { border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; border-radius: 12px; }
+        .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .kpi-card { border-radius: 12px; transition: transform 0.2s; cursor: default; }
+        .kpi-card:hover { transform: translateY(-5px); }
+        .chart-container { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        iframe { width: 100%; border: none; border-radius: 6px; }
+        .page-header { border-bottom: 3px solid #0d6efd; padding-bottom: 10px; margin-bottom: 25px; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="bi bi-building"></i> 酒店预订数据分析</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_home %}{% endblock %}" href="/"><i class="bi bi-house-door"></i> 首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="/dashboard"><i class="bi bi-bar-chart-line"></i> 数据看板</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_model %}{% endblock %}" href="/model"><i class="bi bi-cpu"></i> 模型评估</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block nav_predict %}{% endblock %}" href="/predict"><i class="bi bi-upload"></i> 批量预测</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-1"><strong>酒店预订需求智能数据分析与可视化平台</strong></p>
+                    <p class="mb-0 text-muted small">基于阿里天池 Hotel Booking Demand 数据集</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0 text-muted small">技术栈: Flask + XGBoost + Plotly + Bootstrap 5</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

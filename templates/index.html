@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block nav_home %}active{% endblock %}
+{% block title %}首页 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <h1 class="display-4 fw-bold mb-3" style="color: #1a1a2e;">酒店预订需求智能数据分析与可视化平台</h1>
+        <p class="lead text-muted mb-5">
+            基于阿里天池 Hotel Booking Demand 数据集（12万条真实数据），
+            结合机器学习与数据可视化技术，全面分析酒店预订取消行为。
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm text-center p-4">
+            <div class="display-6 mb-3">📊</div>
+            <h5 class="card-title">数据可视化</h5>
+            <p class="card-text text-muted">Matplotlib / Seaborn 静态图表 + Plotly 交互式图表，全方位展示数据特征与趋势。</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm text-center p-4">
+            <div class="display-6 mb-3">🤖</div>
+            <h5 class="card-title">机器学习</h5>
+            <p class="card-text text-muted">XGBoost 分类模型，经调参优化，准确预测订单取消行为（Accuracy: 0.89, AUC: 0.96）。</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm text-center p-4">
+            <div class="display-6 mb-3">🌐</div>
+            <h5 class="card-title">Web 应用</h5>
+            <p class="card-text text-muted">Flask + Bootstrap 5 构建的响应式 Web 应用，支持批量预测与结果导出。</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-primary h-100">
+            <div class="card-body text-center p-4">
+                <h5 class="card-title text-primary"><i class="bi bi-bar-chart-line"></i> 数据看板</h5>
+                <p class="card-text text-muted">KPI 指标、取消率对比、时间趋势、特征分布、相关性分析</p>
+                <a href="/dashboard" class="btn btn-primary">进入看板</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-success h-100">
+            <div class="card-body text-center p-4">
+                <h5 class="card-title text-success"><i class="bi bi-cpu"></i> 模型评估</h5>
+                <p class="card-text text-muted">评估指标、混淆矩阵、特征重要性排名</p>
+                <a href="/model" class="btn btn-success">查看评估</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-warning h-100">
+            <div class="card-body text-center p-4">
+                <h5 class="card-title text-warning"><i class="bi bi-upload"></i> 批量预测</h5>
+                <p class="card-text text-muted">上传 CSV，自动预测取消预订，支持结果下载</p>
+                <a href="/predict" class="btn btn-warning">开始预测</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-info h-100">
+            <div class="card-body text-center p-4">
+                <h5 class="card-title text-info"><i class="bi bi-info-circle"></i> 项目信息</h5>
+                <p class="card-text text-muted">数据科学与大数据技术专业 - 课程大项目</p>
+                <a href="https://github.com/GottaX-lee/hotel-booking-analysis-platform" target="_blank" class="btn btn-info text-white">查看源码</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
