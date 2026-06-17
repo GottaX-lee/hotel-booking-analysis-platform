@@ -137,4 +137,32 @@
         </div>
     </div>
 </div>
+
+<!-- 神经网络训练可视化 -->
+<h4 class="mb-3 mt-5 page-header"><i class="bi bi-graph-up"></i> PyTorch 神经网络训练过程</h4>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> 模型基本信息</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-2"><strong>算法：</strong> PyTorch MLP</div>
+            <div class="col-md-3 mb-2"><strong>网络结构：</strong> 256-128-64</div>
+            <div class="col-md-3 mb-2"><strong>训练 Epoch：</strong> 100</div>
+            <div class="col-md-3 mb-2"><strong>Batch Size：</strong> 256</div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-3 mb-2"><strong>优化器：</strong> Adam (lr=0.001)</div>
+            <div class="col-md-3 mb-2"><strong>损失函数：</strong> BCELoss</div>
+            <div class="col-md-3 mb-2"><strong>Dropout：</strong> 0.3 / 0.3 / 0.2</div>
+            <div class="col-md-3 mb-2"><strong>激活函数：</strong> ReLU + Sigmoid</div>
+        </div>
+    </div>
+</div>
+
+<div class="chart-container">
+    <h6 class="text-center mb-3 text-muted">训练过程 Loss 曲线与准确率曲线（2x2 子图）</h6>
+    <img src="/static/images/training_history.png" class="img-fluid" alt="训练历史图" style="max-width: 100%;">
+</div>
 {% endblock %}

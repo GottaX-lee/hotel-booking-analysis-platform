@@ -39,3 +39,7 @@ import json
 with open('models/training_history.json', 'w') as f:
     json.dump(history, f)
 print("模型已保存到 models/neural_model.pth")
+
+# 绘制训练过程可视化
+from src.visualization import plot_training_history
+plot_training_history(history, save_path='static/images/training_history.png')
