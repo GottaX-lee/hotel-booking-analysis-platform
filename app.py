@@ -49,15 +49,17 @@ def load_model_evaluation():
         '\u91cd\u8981\u6027': importance
     }).sort_values('\u91cd\u8981\u6027', ascending=False).head(15)
 
+    not_canceled = report['\u672a\u53d6\u6d88']
+    canceled = report['\u53d6\u6d88']
     return {
         'accuracy': f"{acc:.4f}",
         'auc': f"{auc:.4f}",
-        'precision_0': f"{report['\u672a\u53d6\u6d88']['precision']:.4f}",
-        'recall_0': f"{report['\u672a\u53d6\u6d88']['recall']:.4f}",
-        'f1_0': f"{report['\u672a\u53d6\u6d88']['f1-score']:.4f}",
-        'precision_1': f"{report['\u53d6\u6d88']['precision']:.4f}",
-        'recall_1': f"{report['\u53d6\u6d88']['recall']:.4f}",
-        'f1_1': f"{report['\u53d6\u6d88']['f1-score']:.4f}",
+        'precision_0': f"{not_canceled['precision']:.4f}",
+        'recall_0': f"{not_canceled['recall']:.4f}",
+        'f1_0': f"{not_canceled['f1-score']:.4f}",
+        'precision_1': f"{canceled['precision']:.4f}",
+        'recall_1': f"{canceled['recall']:.4f}",
+        'f1_1': f"{canceled['f1-score']:.4f}",
         'train_size': '93,941',
         'test_size': '23,486',
         'feature_importance': feat_imp.to_dict('records'),
@@ -190,5 +192,9 @@ def predict_download():
         mimetype='text/csv'
     )
 
+# ===== Serverless Handler（阿里云函数计算 FC3）=====
+def handler(environ, start_response):
+    return app(environ, start_response)
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)

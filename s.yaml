@@ -1,0 +1,17 @@
+edition: 3.0.0
+name: hotel-booking-analysis
+
+resources:
+  start_flask:
+    component: fc3
+    props:
+      region: cn-hangzhou
+      functionName: hotel-booking-analysis
+      description: 'Hotel Booking Analysis Platform'
+      runtime: python3.9
+      code: ./
+      handler: app.handler
+      memorySize: 1024
+      timeout: 120
+      environmentVariables:
+        PATH: /code/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
