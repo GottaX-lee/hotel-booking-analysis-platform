@@ -125,6 +125,24 @@ def predict_single():
 def predict_risk():
     return render_template('predict_risk.html')
 
+# ===== 路由：场景模拟页 =====
+@app.route('/simulator')
+def simulator():
+    return render_template('simulator.html')
+
+# ===== API：场景模拟 =====
+@app.route('/api/simulator', methods=['POST'])
+def api_simulator():
+    try:
+        from src.simulator import get_default_scenario, run_simulation
+        data = request.get_json() or {}
+        base = get_default_scenario()
+        modified = data.get('scenario_b', base)
+        result = run_simulation(base, modified)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ===== API：单样本预测 =====
 @app.route('/api/predict/single', methods=['POST'])
 def api_predict_single():

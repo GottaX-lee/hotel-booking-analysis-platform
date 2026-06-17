@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% block nav_simulator %}active{% endblock %}
+{% block title %}场景模拟 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-arrow-left-right"></i> What-If 场景模拟器</h2>
+
+<div class="alert alert-info">
+    <strong><i class="bi bi-info-circle"></i> 说明：</strong>
+    调整右侧面板中的参数，模拟不同场景下的取消预测结果。左侧为基准场景，右侧为修改后的场景，实时对比变化。
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-pin"></i> 基准场景</h5>
+            </div>
+            <div class="card-body" id="baselinePanel">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-secondary" role="status"></div>
+                    <p class="mt-2 text-muted">加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-sliders"></i> 参数调节</h5>
+                <button class="btn btn-light btn-sm" onclick="resetToDefault()">重置默认</button>
+            </div>
+            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                <form id="simForm">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small">酒店类型</label>
+                            <select class="form-select form-select-sm" id="hotel" onchange="runSim()">
+                                <option value="City Hotel">City Hotel</option>
+                                <option value="Resort Hotel" selected>Resort Hotel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">押金类型</label>
+                            <select class="form-select form-select-sm" id="deposit_type" onchange="runSim()">
+                                <option value="No Deposit" selected>No Deposit</option>
+                                <option value="Non Refund">Non Refund</option>
+                                <option value="Refundable">Refundable</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">市场细分</label>
+                            <select class="form-select form-select-sm" id="market_segment" onchange="runSim()">
+                                <option>Online TA</option><option>Offline TA/TO</option>
+                                <option>Direct</option><option>Corporate</option>
+                                <option>Groups</option><option>Aviation</option>
+                                <option>Complementary</option><option>Undefined</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">客户类型</label>
+                            <select class="form-select form-select-sm" id="customer_type" onchange="runSim()">
+                                <option>Transient</option><option>Transient-Party</option>
+                                <option>Contract</option><option>Group</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">餐食</label>
+                            <select class="form-select form-select-sm" id="meal" onchange="runSim()">
+                                <option>BB</option><option>FB</option><option>HB</option><option>SC</option><option>Undefined</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">预订房间</label>
+                            <select class="form-select form-select-sm" id="reserved_room_type" onchange="runSim()">
+                                <option>A</option><option>B</option><option>C</option><option>D</option>
+                                <option>E</option><option>F</option><option>G</option><option>H</option><option>L</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">国家</label>
+                            <select class="form-select form-select-sm" id="country" onchange="runSim()">
+                                <option>PRT</option><option>GBR</option><option>FRA</option><option>ESP</option>
+                                <option>DEU</option><option>ITA</option><option>USA</option><option>CHN</option>
+                                <option>BRA</option><option>Unknown</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">分配房间</label>
+                            <select class="form-select form-select-sm" id="assigned_room_type" onchange="runSim()">
+                                <option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+                                <option>F</option><option>G</option><option>H</option><option>I</option><option>K</option><option>L</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">分销渠道</label>
+                            <select class="form-select form-select-sm" id="distribution_channel" onchange="runSim()">
+                                <option>TA/TO</option><option>Direct</option><option>Corporate</option><option>GDS</option><option>Undefined</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">月份</label>
+                            <select class="form-select form-select-sm" id="arrival_date_month" onchange="runSim()">
+                                <option>January</option><option>February</option><option>March</option><option>April</option>
+                                <option>May</option><option>June</option><option selected>July</option><option>August</option>
+                                <option>September</option><option>October</option><option>November</option><option>December</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">年份</label>
+                            <select class="form-select form-select-sm" id="arrival_date_year" onchange="runSim()">
+                                <option>2015</option><option selected>2016</option><option>2017</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">停车位</label>
+                            <select class="form-select form-select-sm" id="required_car_parking_spaces" onchange="runSim()">
+                                <option value="0">不需要</option><option value="1">需要</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">重复客户</label>
+                            <select class="form-select form-select-sm" id="is_repeated_guest" onchange="runSim()">
+                                <option value="0">否</option><option value="1">是</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">提前天数: <span id="lead_time_v">100</span></label>
+                            <input type="range" class="form-range" id="lead_time" min="0" max="737" value="100" oninput="document.getElementById('lead_time_v').textContent=this.value;runSim()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">房价 ADR: <span id="adr_v">100</span></label>
+                            <input type="range" class="form-range" id="adr" min="0" max="500" value="100" step="5" oninput="document.getElementById('adr_v').textContent=this.value;runSim()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">入住人数: <span id="total_guests_v">2</span></label>
+                            <input type="range" class="form-range" id="total_guests" min="1" max="10" value="2" oninput="document.getElementById('total_guests_v').textContent=this.value;runSim()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">入住晚数: <span id="total_stay_v">3</span></label>
+                            <input type="range" class="form-range" id="total_stay" min="1" max="69" value="3" oninput="document.getElementById('total_stay_v').textContent=this.value;runSim()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">特殊要求: <span id="special_v">0</span></label>
+                            <input type="range" class="form-range" id="total_of_special_requests" min="0" max="5" value="0" oninput="document.getElementById('special_v').textContent=this.value;runSim()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">历史取消: <span id="prev_cancel_v">0</span></label>
+                            <input type="range" class="form-range" id="previous_cancellations" min="0" max="25" value="0" oninput="document.getElementById('prev_cancel_v').textContent=this.value;runSim()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small">变更次数: <span id="changes_v">0</span></label>
+                            <input type="range" class="form-range" id="booking_changes" min="0" max="10" value="0" oninput="document.getElementById('changes_v').textContent=this.value;runSim()">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3" id="resultCard" style="display:none;">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> 对比结果</h5>
+            </div>
+            <div class="card-body" id="resultPanel"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<style>
+.scenario-box { border-radius: 10px; padding: 15px; text-align: center; }
+.scenario-baseline { background: #f0f0f0; }
+.scenario-modified { background: #e3f2fd; }
+.changed-badge { background: #fff3cd; color: #856404; padding: 1px 6px; border-radius: 4px; font-size: 0.75em; margin-left: 4px; }
+</style>
+<script>
+let defaultScenario = null;
+
+function getFormFeatures() {
+    return {
+        hotel: document.getElementById('hotel').value,
+        lead_time: parseFloat(document.getElementById('lead_time').value),
+        adr: parseFloat(document.getElementById('adr').value),
+        total_guests: parseFloat(document.getElementById('total_guests').value),
+        total_stay: parseFloat(document.getElementById('total_stay').value),
+        total_of_special_requests: parseFloat(document.getElementById('total_of_special_requests').value),
+        previous_cancellations: parseFloat(document.getElementById('previous_cancellations').value),
+        booking_changes: parseFloat(document.getElementById('booking_changes').value),
+        arrival_date_year: parseInt(document.getElementById('arrival_date_year').value),
+        arrival_date_month: document.getElementById('arrival_date_month').value,
+        market_segment: document.getElementById('market_segment').value,
+        deposit_type: document.getElementById('deposit_type').value,
+        customer_type: document.getElementById('customer_type').value,
+        meal: document.getElementById('meal').value,
+        country: document.getElementById('country').value,
+        reserved_room_type: document.getElementById('reserved_room_type').value,
+        assigned_room_type: document.getElementById('assigned_room_type').value,
+        distribution_channel: document.getElementById('distribution_channel').value,
+        required_car_parking_spaces: parseInt(document.getElementById('required_car_parking_spaces').value),
+        is_repeated_guest: parseInt(document.getElementById('is_repeated_guest').value),
+        stays_in_weekend_nights: 1,
+        stays_in_week_nights: Math.max(1, parseFloat(document.getElementById('total_stay').value) - 1),
+        adults: Math.min(parseFloat(document.getElementById('total_guests').value), 4),
+        children: 0, babies: 0, agent: 0,
+        arrival_date_week_number: 27, arrival_date_day_of_month: 15,
+        previous_bookings_not_canceled: 0, days_in_waiting_list: 0,
+    };
+}
+
+function runSim() {
+    const modified = getFormFeatures();
+    fetch('/api/simulator', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({scenario_b: modified}),
+    })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('resultCard').style.display = 'block';
+        renderResults(data);
+        renderBaseline(data.scenario_a);
+    })
+    .catch(err => console.error(err));
+}
+
+function renderBaseline(scene) {
+    const p = scene.params;
+    document.getElementById('baselinePanel').innerHTML = `
+        <div class="scenario-box scenario-baseline mb-3">
+            ${scene.prediction === 1
+                ? '<div class="display-4 text-danger">&#10060;</div><h5 class="text-danger">预测取消</h5>'
+                : '<div class="display-4 text-success">&#9989;</div><h5 class="text-success">预测不取消</h5>'}
+            <h4 class="mb-0">${(scene.probability * 100).toFixed(1)}%</h4>
+            <small class="text-muted">取消概率</small>
+        </div>
+        <table class="table table-sm table-borderless small mb-0">
+            <tr><td>酒店</td><td>${p.hotel}</td></tr>
+            <tr><td>押金</td><td>${p.deposit_type}</td></tr>
+            <tr><td>提前</td><td>${p.lead_time} 天</td></tr>
+            <tr><td>ADR</td><td>¥${p.adr}</td></tr>
+            <tr><td>入住</td><td>${p.total_guests} 人 / ${p.total_stay} 晚</td></tr>
+            <tr><td>市场</td><td>${p.market_segment}</td></tr>
+            <tr><td>客户</td><td>${p.customer_type}</td></tr>
+            <tr><td>国家</td><td>${p.country}</td></tr>
+            <tr><td>要求</td><td>${p.total_of_special_requests} 项</td></tr>
+        </table>
+    `;
+}
+
+function renderResults(data) {
+    const a = data.scenario_a;
+    const b = data.scenario_b;
+    const changed = data.changed_features;
+    const keys = Object.keys(changed);
+    document.getElementById('resultPanel').innerHTML = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="scenario-box scenario-baseline">
+                    <small class="text-muted">基准场景</small>
+                    ${a.prediction === 1
+                        ? '<div class="display-5 text-danger">&#10060;</div><h5 class="text-danger">取消</h5>'
+                        : '<div class="display-5 text-success">&#9989;</div><h5 class="text-success">不取消</h5>'}
+                    <h3 class="mb-0">${(a.probability * 100).toFixed(1)}%</h3>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="scenario-box scenario-modified">
+                    <small class="text-muted">修改后场景</small>
+                    ${b.prediction === 1
+                        ? '<div class="display-5 text-danger">&#10060;</div><h5 class="text-danger">取消</h5>'
+                        : '<div class="display-5 text-success">&#9989;</div><h5 class="text-success">不取消</h5>'}
+                    <h3 class="mb-0">${(b.probability * 100).toFixed(1)}%</h3>
+                </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <div class="progress" style="height: 25px;">
+                <div class="progress-bar bg-info" style="width: ${(data.probability_diff * 100).toFixed(1)}%">
+                    概率变化: ${(data.probability_diff * 100).toFixed(1)}%
+                </div>
+            </div>
+        </div>
+        ${keys.length > 0 ? `
+        <h6 class="mt-3 mb-2">变化的参数 (${keys.length})：</h6>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0">
+                <thead class="table-warning">
+                    <tr><th>参数</th><th>基准值</th><th class="bg-info text-white">修改值</th></tr>
+                </thead>
+                <tbody>
+                    ${keys.map(k => {
+                        const c = changed[k];
+                        const val = typeof c.before === 'number' ? c.before : (c.before === 0 ? '0' : c.before);
+                        const val2 = typeof c.after === 'number' ? c.after : (c.after === 0 ? '0' : c.after);
+                        return `<tr><td>${k}</td><td>${val}</td><td class="table-info fw-bold">${val2}</td></tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+        ` : '<p class="text-muted mt-3 mb-0 small">尚未修改任何参数</p>'}
+    `;
+}
+
+function resetToDefault() {
+    if (!defaultScenario) return;
+    Object.keys(defaultScenario).forEach(key => {
+        const el = document.getElementById(key);
+        if (el) el.value = defaultScenario[key];
+    });
+    document.querySelectorAll('[id$="_v"]').forEach(s => {
+        const src = document.getElementById(s.id.replace('_v', ''));
+        if (src) s.textContent = src.value;
+    });
+    runSim();
+}
+
+window.addEventListener('load', async () => {
+    const resp = await fetch('/api/simulator', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({}),
+    });
+    const data = await resp.json();
+    defaultScenario = data.scenario_a.params;
+    renderBaseline(data.scenario_a);
+    renderResults(data);
+    document.getElementById('resultCard').style.display = 'block';
+});
+</script>
+{% endblock %}
