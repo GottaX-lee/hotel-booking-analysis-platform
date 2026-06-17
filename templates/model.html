@@ -187,8 +187,8 @@
                 <tbody>
                     <tr class="table-success">
                         <td><strong>XGBoost (优化模型)</strong></td>
-                        <td><strong>0.8818</strong></td>
-                        <td><strong>0.9543</strong></td>
+                        <td><strong>0.8808</strong></td>
+                        <td><strong>0.9546</strong></td>
                         <td>梯度提升树</td>
                     </tr>
                     <tr class="table-info">
@@ -229,6 +229,45 @@
                     <li>端到端学习，无需手动特征工程</li>
                     <li>适合大规模数据场景</li>
                 </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SHAP 可解释性分析 -->
+<h4 class="mb-3 mt-5 page-header"><i class="bi bi-search-heart"></i> SHAP 可解释性分析</h4>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> 关于 SHAP</h5>
+    </div>
+    <div class="card-body">
+        <p>SHAP (SHapley Additive exPlanations) 基于博弈论中的 Shapley 值，量化每个特征对预测结果的贡献度。正值表示该特征值推动模型预测为取消，负值表示推动预测为不取消。颜色表示特征值的高低（红色=高，蓝色=低）。</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <h6 class="text-center mb-3 text-muted">SHAP Summary Plot（样本量: 500）</h6>
+            <img src="/static/images/shap_summary.png" class="img-fluid" alt="SHAP Summary Plot">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-info h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-star"></i> SHAP Top 5 重要特征</h5>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li><strong>deposit_type</strong> — 押金类型</li>
+                    <li><strong>country</strong> — 客户所在国家</li>
+                    <li><strong>required_car_parking_spaces</strong> — 停车位需求</li>
+                    <li><strong>agent</strong> — 旅行社编号</li>
+                    <li><strong>total_of_special_requests</strong> — 特殊请求数</li>
+                </ol>
+                <hr>
+                <p class="small text-muted mb-0">与 XGBoost 内置特征重要性对比：deposit_type 在两个方法中均排第一，确认其作为最强预测因子的地位。</p>
             </div>
         </div>
     </div>
