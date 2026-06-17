@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block nav_model %}active{% endblock %}
+{% block title %}模型评估 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-cpu"></i> 模型评估</h2>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> 模型基本信息</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-2"><strong>算法：</strong> XGBoost 分类器</div>
+            <div class="col-md-3 mb-2"><strong>训练集大小：</strong> {{ eval.train_size }} 条</div>
+            <div class="col-md-3 mb-2"><strong>测试集大小：</strong> {{ eval.test_size }} 条</div>
+            <div class="col-md-3 mb-2"><strong>目标变量：</strong> is_canceled</div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-3 mb-2"><strong>超参数：</strong> n_estimators=200, max_depth=6</div>
+            <div class="col-md-3 mb-2"><strong>学习率：</strong> 0.1</div>
+            <div class="col-md-3 mb-2"><strong>特征数：</strong> 30</div>
+            <div class="col-md-3 mb-2"><strong>数据来源：</strong> 阿里天池 Hotel Booking Demand</div>
+        </div>
+    </div>
+</div>
+
+<h5 class="mb-3"><i class="bi bi-bar-chart"></i> 评估指标</h5>
+<div class="row g-3 mb-4">
+    <div class="col-md-2-4 col-sm-6" style="width: 20%;">
+        <div class="card metric-card bg-primary text-white text-center h-100" style="border-radius: 12px;">
+            <div class="card-body">
+                <h6 class="text-white-50">准确率</h6>
+                <h3 class="mb-0">{{ eval.accuracy }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2-4 col-sm-6" style="width: 20%;">
+        <div class="card metric-card bg-success text-white text-center h-100" style="border-radius: 12px;">
+            <div class="card-body">
+                <h6 class="text-white-50">ROC-AUC</h6>
+                <h3 class="mb-0">{{ eval.auc }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2-4 col-sm-6" style="width: 20%;">
+        <div class="card metric-card bg-info text-white text-center h-100" style="border-radius: 12px;">
+            <div class="card-body">
+                <h6 class="text-white-50">精确率 (取消)</h6>
+                <h3 class="mb-0">{{ eval.precision_1 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2-4 col-sm-6" style="width: 20%;">
+        <div class="card metric-card bg-warning text-dark text-center h-100" style="border-radius: 12px;">
+            <div class="card-body">
+                <h6 class="text-dark-50">召回率 (取消)</h6>
+                <h3 class="mb-0">{{ eval.recall_1 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2-4 col-sm-6" style="width: 20%;">
+        <div class="card metric-card bg-danger text-white text-center h-100" style="border-radius: 12px;">
+            <div class="card-body">
+                <h6 class="text-white-50">F1 分数 (取消)</h6>
+                <h3 class="mb-0">{{ eval.f1_1 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h6 class="text-center mb-3 text-muted">优化模型混淆矩阵</h6>
+            <img src="/static/images/confusion_matrix_optimized.png" class="img-fluid" alt="混淆矩阵">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h6 class="text-center mb-3 text-muted">特征重要性 (Top 15)</h6>
+            <img src="/static/images/feature_importance.png" class="img-fluid" alt="特征重要性">
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-list-ol"></i> 特征重要性排名 (Top 15)</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>排名</th>
+                        <th>特征名称</th>
+                        <th>重要性</th>
+                        <th>占比</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feat in eval.feature_importance %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ feat['特征'] }}</td>
+                        <td>{{ '%.4f'|format(feat['重要性']) }}</td>
+                        <td>{{ '%.2f'|format(feat['重要性'] * 100) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-danger h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> 数据泄露对照实验</h5>
+            </div>
+            <div class="card-body">
+                <p>删除泄露列后，模型真实准确率 {{ eval.accuracy }}。若保留 <code>reservation_status</code>，准确率可达 100%。</p>
+                <p class="mb-0"><strong>结论：</strong>数据泄露导致模型性能虚高 +13%，物理删除泄露列是正确决策。</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-info h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-lightbulb"></i> 业务解读</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>deposit_type</strong>（押金类型，重要性 0.548）是影响取消的最重要特征。</p>
+                <p>收取押金的订单取消率显著低于无押金订单，说明押金机制有效约束了客户的取消行为。</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
