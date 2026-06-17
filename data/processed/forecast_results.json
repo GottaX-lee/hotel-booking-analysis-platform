@@ -1,0 +1,108 @@
+{
+  "forecast": [
+    {
+      "month": "2017-09",
+      "predicted_bookings": 5242.0,
+      "trend": "--"
+    },
+    {
+      "month": "2017-10",
+      "predicted_bookings": 5682.0,
+      "trend": "上升"
+    },
+    {
+      "month": "2017-11",
+      "predicted_bookings": 5056.0,
+      "trend": "下降"
+    },
+    {
+      "month": "2017-12",
+      "predicted_bookings": 4032.0,
+      "trend": "下降"
+    },
+    {
+      "month": "2018-01",
+      "predicted_bookings": 3670.0,
+      "trend": "下降"
+    },
+    {
+      "month": "2018-02",
+      "predicted_bookings": 3986.0,
+      "trend": "上升"
+    },
+    {
+      "month": "2018-03",
+      "predicted_bookings": 4614.0,
+      "trend": "上升"
+    },
+    {
+      "month": "2018-04",
+      "predicted_bookings": 5404.0,
+      "trend": "上升"
+    },
+    {
+      "month": "2018-05",
+      "predicted_bookings": 5613.0,
+      "trend": "上升"
+    },
+    {
+      "month": "2018-06",
+      "predicted_bookings": 4732.0,
+      "trend": "下降"
+    },
+    {
+      "month": "2018-07",
+      "predicted_bookings": 4367.0,
+      "trend": "下降"
+    },
+    {
+      "month": "2018-08",
+      "predicted_bookings": 4414.0,
+      "trend": "上升"
+    }
+  ],
+  "future_dates": [
+    "2017-09-01",
+    "2017-10-01",
+    "2017-11-01",
+    "2017-12-01",
+    "2018-01-01",
+    "2018-02-01",
+    "2018-03-01",
+    "2018-04-01",
+    "2018-05-01",
+    "2018-06-01",
+    "2018-07-01",
+    "2018-08-01"
+  ],
+  "future_bookings": [
+    5242.0,
+    5682.0,
+    5056.0,
+    4032.0,
+    3670.0,
+    3986.0,
+    4614.0,
+    5404.0,
+    5613.0,
+    4732.0,
+    4367.0,
+    4414.0
+  ],
+  "future_cancel_rates": [
+    33.57,
+    34.53,
+    41.42,
+    42.23,
+    42.04,
+    36.45,
+    36.97,
+    45.48,
+    42.16,
+    33.95,
+    32.88,
+    27.84
+  ],
+  "test_mae": 539.8,
+  "train_mae": 23.2
+}

@@ -140,6 +140,11 @@ def revenue():
 def segmentation():
     return render_template('segmentation.html')
 
+# ===== 路由：季节性预测页 =====
+@app.route('/forecast')
+def forecast():
+    return render_template('forecast.html')
+
 # ===== API：客户画像 =====
 @app.route('/api/segmentation')
 def api_segmentation():
@@ -167,6 +172,17 @@ def api_segmentation():
             profiles.append(profile)
 
         return jsonify({'success': True, 'profiles': profiles, 'features': features, 'n_clusters': config['n_clusters']})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ===== API：季节性预测 =====
+@app.route('/api/forecast')
+def api_forecast():
+    try:
+        import json
+        with open('data/processed/forecast_results.json') as f:
+            result = json.load(f)
+        return jsonify({'success': True, **result})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

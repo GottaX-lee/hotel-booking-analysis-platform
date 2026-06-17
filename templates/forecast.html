@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block nav_forecast %}active{% endblock %}
+{% block title %}季节性预测 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-graph-up-arrow"></i> 季节性预测（LSTM）</h2>
+
+<div class="alert alert-info">
+    <strong><i class="bi bi-info-circle"></i> 说明：</strong>
+    基于 LSTM 深度学习模型，对过去 36 个月的酒店预订数据进行时间序列建模，预测未来 12 个月的订单量和取消率走势。
+    使用前 6 个月数据预测第 7 个月（滑动窗口），捕捉季节性周期模式。
+</div>
+
+<div class="row g-3 mb-4" id="kpiArea"></div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h6 class="text-center mb-3 text-muted">月度订单量预测</h6>
+            <img src="/static/images/lstm_forecast.png" class="img-fluid" alt="LSTM预测图">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h6 class="text-center mb-3 text-muted">月度取消率预测</h6>
+            <img src="/static/images/lstm_cancel_rate.png" class="img-fluid" alt="取消率预测图">
+        </div>
+    </div>
+</div>
+
+<h4 class="mb-3"><i class="bi bi-table"></i> 未来 12 个月详细预测</h4>
+<div class="card mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0 text-center" id="forecastTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>月份</th>
+                        <th>预测订单数</th>
+                        <th>预测取消率</th>
+                        <th>趋势</th>
+                    </tr>
+                </thead>
+                <tbody id="forecastTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <h6 class="text-white-50">预测总订单数（12个月）</h6>
+                <h2 id="totalForecast" class="mb-0">-</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <h6>平均预测取消率</h6>
+                <h2 id="avgCancelRate" class="mb-0">-</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <h6 class="text-white-50">预测 MAE</h6>
+                <h2 id="testMae" class="mb-0">-</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0"><i class="bi bi-lightbulb"></i> 业务洞察</h5>
+    </div>
+    <div class="card-body">
+        <ul class="mb-0">
+            <li><strong>旺季预测：</strong>2018年4月预测订单量最高（5,732单），建议提前调配房源和人手</li>
+            <li><strong>淡季预测：</strong>2018年1月最低（3,858单），可考虑淡季促销策略</li>
+            <li><strong>取消率预测：</strong>整体取消率维持约 30-45%，需关注高风险群组的提前预警</li>
+            <li><strong>季节性周期：</strong>春夏（3-4月）订单增加，秋冬（11-1月）回落，呈现明显季节性</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function trendIcon(trend) {
+    if (trend === '上升') return '<span class="text-danger">&#9650; 上升</span>';
+    if (trend === '下降') return '<span class="text-success">&#9660; 下降</span>';
+    return '<span class="text-muted">-</span>';
+}
+
+function trendColor(val, prev) {
+    if (prev === undefined || prev === null) return 'text-muted';
+    return val > prev ? 'text-danger' : 'text-success';
+}
+
+window.addEventListener('load', async () => {
+    try {
+        const resp = await fetch('/api/forecast');
+        const data = await resp.json();
+        if (!data.success) return;
+
+        // KPI cards
+        const totalBookings = data.forecast.reduce((s, r) => s + r.predicted_bookings, 0);
+        const avgCancel = data.future_cancel_rates.reduce((s, v) => s + v, 0) / data.future_cancel_rates.length;
+        document.getElementById('totalForecast').textContent = totalBookings.toLocaleString();
+        document.getElementById('avgCancelRate').textContent = avgCancel.toFixed(1) + '%';
+        document.getElementById('testMae').textContent = data.test_mae.toLocaleString();
+
+        // Forecast table
+        const tbody = document.getElementById('forecastTableBody');
+        tbody.innerHTML = data.forecast.map((r, i) => `
+            <tr>
+                <td><strong>${r.month}</strong></td>
+                <td>${r.predicted_bookings.toLocaleString()}</td>
+                <td>${data.future_cancel_rates[i].toFixed(1)}%</td>
+                <td>${trendIcon(r.trend)}</td>
+            </tr>
+        `).join('');
+    } catch (e) {
+        console.error(e);
+    }
+});
+</script>
+{% endblock %}
