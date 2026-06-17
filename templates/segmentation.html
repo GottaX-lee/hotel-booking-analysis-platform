@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block nav_segmentation %}active{% endblock %}
+{% block title %}客户画像 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-people"></i> 客户细分画像</h2>
+
+<div class="alert alert-info">
+    <strong><i class="bi bi-info-circle"></i> 说明：</strong>
+    基于 K-Means 聚类算法，对 50,000 条客户数据进行无监督学习，自动识别出 4 个具有不同行为特征的客户群组。每个群组的轮廓特征通过关键指标（提前天数、ADR、入住人数等）的平均值来描述。
+</div>
+
+<div class="row g-3 mb-4" id="kpiCards"></div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h6 class="text-center mb-3 text-muted">客户群组分布与取消率</h6>
+            <img src="/static/images/cluster_distribution.png" class="img-fluid" alt="聚类分布">
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h6 class="text-center mb-3 text-muted">特征空间聚类散点图</h6>
+            <img src="/static/images/cluster_scatter.png" class="img-fluid" alt="聚类散点图">
+        </div>
+    </div>
+</div>
+
+<h4 class="mb-3"><i class="bi bi-table"></i> 各群组特征详情</h4>
+<div class="card mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0 text-center" id="profileTable">
+                <thead class="table-dark" id="profileHead"></thead>
+                <tbody id="profileBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-danger h-100">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> 高风险群组分析</h5>
+            </div>
+            <div class="card-body" id="highRiskGroup">
+                <p>加载中...</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-success h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-star"></i> 低风险群组分析</h5>
+            </div>
+            <div class="card-body" id="lowRiskGroup">
+                <p>加载中...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+window.addEventListener('load', async () => {
+    try {
+        const resp = await fetch('/api/segmentation');
+        const data = await resp.json();
+        if (!data.success) return;
+        renderKPI(data.profiles);
+        renderTable(data.profiles, data.features);
+        renderAnalysis(data.profiles);
+    } catch (e) {
+        console.error(e);
+    }
+});
+
+function renderKPI(profiles) {
+    const container = document.getElementById('kpiCards');
+    const colors = ['primary', 'info', 'danger', 'success'];
+    container.innerHTML = profiles.map((p, i) => `
+        <div class="col-md-3">
+            <div class="card kpi-card bg-${colors[i]} text-white h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-white-50">群组 ${p.cluster + 1}</h6>
+                    <h3 class="mb-0">${p.size.toLocaleString()}</h3>
+                    <small>客户数 / 取消率 ${(p.cancel_rate * 100).toFixed(1)}%</small>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderTable(profiles, features) {
+    const head = document.getElementById('profileHead');
+    const body = document.getElementById('profileBody');
+    const metricLabels = {
+        'lead_time': '提前天数', 'adr': 'ADR', 'stays_in_weekend_nights': '周末晚数',
+        'stays_in_week_nights': '工作日晚数', 'adults': '成人', 'children': '儿童',
+        'babies': '婴儿', 'previous_cancellations': '历史取消', 'booking_changes': '变更次数',
+        'total_of_special_requests': '特殊要求', 'required_car_parking_spaces': '停车位',
+        'is_repeated_guest': '重复客户', 'days_in_waiting_list': '等待天数',
+        'previous_bookings_not_canceled': '历史未取消'
+    };
+    const shownFeats = features.slice(0, 6);
+    head.innerHTML = '<tr><th>指标</th>' + profiles.map(p => `<th class="bg-primary text-white">群组 ${p.cluster + 1}</th>`).join('') + '</tr>';
+    body.innerHTML = shownFeats.map(feat => `
+        <tr>
+            <td><strong>${metricLabels[feat] || feat}</strong></td>
+            ${profiles.map(p => `<td>${p[feat] !== undefined ? p[feat] : '-'}</td>`).join('')}
+        </tr>
+    `).join('');
+    body.innerHTML += `
+        <tr class="table-warning">
+            <td><strong>取消率</strong></td>
+            ${profiles.map(p => `<td><strong>${(p.cancel_rate * 100).toFixed(1)}%</strong></td>`).join('')}
+        </tr>
+        <tr class="table-info">
+            <td><strong>客户数</strong></td>
+            ${profiles.map(p => `<td><strong>${p.size.toLocaleString()}</strong></td>`).join('')}
+        </tr>
+    `;
+}
+
+function renderAnalysis(profiles) {
+    const sorted = [...profiles].sort((a, b) => b.cancel_rate - a.cancel_rate);
+
+    const high = sorted[0];
+    const low = sorted[sorted.length - 1];
+
+    document.getElementById('highRiskGroup').innerHTML = `
+        <h4 class="text-danger">群组 ${high.cluster + 1}</h4>
+        <p><strong>取消率: ${(high.cancel_rate * 100).toFixed(1)}%</strong></p>
+        <p>客户数: ${high.size.toLocaleString()} (${(high.size / profiles.reduce((s,p) => s + p.size, 0) * 100).toFixed(1)}%)</p>
+        <hr>
+        <p><strong>特征：</strong></p>
+        <ul>
+            <li>提前预订天数: ${high.lead_time || '-'} 天</li>
+            <li>ADR: ¥${high.adr || '-'}</li>
+            <li>入住晚数: ${(high.stays_in_week_nights || 0) + (high.stays_in_weekend_nights || 0)}</li>
+        </ul>
+        <p class="text-muted small mb-0">建议：针对此群组实施押金策略或提前预警。</p>
+    `;
+
+    document.getElementById('lowRiskGroup').innerHTML = `
+        <h4 class="text-success">群组 ${low.cluster + 1}</h4>
+        <p><strong>取消率: ${(low.cancel_rate * 100).toFixed(1)}%</strong></p>
+        <p>客户数: ${low.size.toLocaleString()} (${(low.size / profiles.reduce((s,p) => s + p.size, 0) * 100).toFixed(1)}%)</p>
+        <hr>
+        <p><strong>特征：</strong></p>
+        <ul>
+            <li>提前预订天数: ${low.lead_time || '-'} 天</li>
+            <li>ADR: ¥${low.adr || '-'}</li>
+            <li>入住晚数: ${(low.stays_in_week_nights || 0) + (low.stays_in_weekend_nights || 0)}</li>
+        </ul>
+        <p class="text-muted small mb-0">建议：对此群组提供忠诚度计划，维持高转化。</p>
+    `;
+}
+</script>
+{% endblock %}

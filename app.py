@@ -135,6 +135,41 @@ def simulator():
 def revenue():
     return render_template('revenue_calculator.html')
 
+# ===== 路由：客户画像页 =====
+@app.route('/segmentation')
+def segmentation():
+    return render_template('segmentation.html')
+
+# ===== API：客户画像 =====
+@app.route('/api/segmentation')
+def api_segmentation():
+    try:
+        from src.customer_segmentation import load_segmentation
+        kmeans, scaler, config = load_segmentation()
+        import pandas as pd
+        df = pd.read_csv('data/processed/cleaned_data.csv')
+        features = config['features']
+        if len(df) > 50000:
+            df = df.sample(n=50000, random_state=42)
+        X = df[features].fillna(0).values
+        X_scaled = scaler.transform(X)
+        labels = kmeans.predict(X_scaled)
+
+        profiles = []
+        for i in range(config['n_clusters']):
+            mask = labels == i
+            cluster_df = df.iloc[mask]
+            size = int(mask.sum())
+            cancel_rate = float(cluster_df['is_canceled'].mean())
+            profile = {'cluster': i, 'size': size, 'cancel_rate': round(cancel_rate, 4)}
+            for feat in features[:8]:
+                profile[feat] = round(float(cluster_df[feat].mean()), 2)
+            profiles.append(profile)
+
+        return jsonify({'success': True, 'profiles': profiles, 'features': features, 'n_clusters': config['n_clusters']})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ===== API：场景模拟 =====
 @app.route('/api/simulator', methods=['POST'])
 def api_simulator():
