@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block nav_risk %}active{% endblock %}
+{% block title %}风险预警 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-exclamation-triangle"></i> 高取消风险订单预警</h2>
+
+<div class="alert alert-warning">
+    <strong><i class="bi bi-info-circle"></i> 说明：</strong>
+    基于测试集数据，自动预测每条记录的取消概率，并按阈值筛选高风险订单。
+    拖动下方滑块调整预警阈值，阈值越低，预警范围越广。
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <label class="form-label fw-bold">预警阈值：取消概率 ≥ <span id="thresholdVal" class="text-danger">0.7</span></label>
+                <input type="range" class="form-range" id="thresholdSlider" min="0.3" max="0.95" step="0.05" value="0.7"
+                       oninput="document.getElementById('thresholdVal').textContent=this.value">
+                <div class="d-flex justify-content-between small text-muted">
+                    <span>宽松 (0.3)</span>
+                    <span>适中 (0.7)</span>
+                    <span>严格 (0.95)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <button class="btn btn-danger btn-lg w-100 h-100" onclick="loadRiskData()">
+            <i class="bi bi-search"></i> 查询高风险订单
+        </button>
+    </div>
+</div>
+
+<div id="loadingSpinner" class="text-center mt-4" style="display:none;">
+    <div class="spinner-border text-danger" role="status" style="width: 3rem; height: 3rem;"></div>
+    <p class="mt-2 text-muted">正在分析风险...</p>
+</div>
+
+<div id="resultArea" style="display:none;">
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="card bg-dark text-white text-center h-100">
+                <div class="card-body">
+                    <h6>总订单数</h6>
+                    <h3 id="totalCount" class="mb-0">-</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white text-center h-100">
+                <div class="card-body">
+                    <h6>高风险订单</h6>
+                    <h3 id="highRiskCount" class="mb-0">-</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white text-center h-100">
+                <div class="card-body">
+                    <h6>低风险订单</h6>
+                    <h3 id="lowRiskCount" class="mb-0">-</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark text-center h-100">
+                <div class="card-body">
+                    <h6>风险比例</h6>
+                    <h3 id="riskRate" class="mb-0">-</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-table"></i> 高风险订单列表</span>
+            <span class="badge bg-light text-danger" id="badgeCount">0 条</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-striped table-hover mb-0" id="riskTable">
+                    <thead class="table-danger" id="riskTableHead"></thead>
+                    <tbody id="riskTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="errorArea" class="alert alert-danger mt-3" style="display:none;"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('thresholdSlider').addEventListener('change', loadRiskData);
+document.getElementById('thresholdSlider').addEventListener('input', function() {
+    document.getElementById('thresholdVal').textContent = this.value;
+});
+
+function loadRiskData() {
+    const threshold = parseFloat(document.getElementById('thresholdSlider').value);
+    document.getElementById('loadingSpinner').style.display = 'block';
+    document.getElementById('resultArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'none';
+
+    fetch('/api/predict/risk', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({threshold: threshold}),
+    })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        if (data.success) {
+            showResults(data);
+        } else {
+            showError(data.error || '查询失败');
+        }
+    })
+    .catch(err => {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        showError('网络错误: ' + err.message);
+    });
+}
+
+function showResults(data) {
+    document.getElementById('totalCount').textContent = data.total_count;
+    document.getElementById('highRiskCount').textContent = data.high_risk_count;
+    document.getElementById('lowRiskCount').textContent = data.low_risk_count;
+    document.getElementById('riskRate').textContent = (data.risk_rate * 100).toFixed(1) + '%';
+    document.getElementById('badgeCount').textContent = data.high_risk_count + ' 条';
+
+    const thead = document.getElementById('riskTableHead');
+    const tbody = document.getElementById('riskTableBody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    if (data.records.length > 0) {
+        const headers = Object.keys(data.records[0]);
+        headers.forEach(h => {
+            const th = document.createElement('th');
+            th.textContent = h;
+            thead.appendChild(th);
+        });
+        data.records.forEach(row => {
+            const tr = document.createElement('tr');
+            headers.forEach(h => {
+                const td = document.createElement('td');
+                let val = row[h];
+                if (h === 'cancel_probability') {
+                    td.innerHTML = '<div class="progress" style="height: 20px;"><div class="progress-bar bg-danger" style="width: ' + (val * 100).toFixed(0) + '%">' + (val * 100).toFixed(1) + '%</div></div>';
+                } else {
+                    td.textContent = val;
+                }
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+    } else {
+        tbody.innerHTML = '<tr><td colspan="99" class="text-center text-muted py-4">未找到高风险订单</td></tr>';
+    }
+
+    document.getElementById('resultArea').style.display = 'block';
+}
+
+function showError(msg) {
+    const ea = document.getElementById('errorArea');
+    ea.textContent = msg;
+    ea.style.display = 'block';
+}
+
+// 页面加载时自动查询
+window.addEventListener('load', loadRiskData);
+</script>
+{% endblock %}

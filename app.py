@@ -120,6 +120,11 @@ def predict():
 def predict_single():
     return render_template('predict_single.html')
 
+# ===== 路由：风险预警页 =====
+@app.route('/predict/risk')
+def predict_risk():
+    return render_template('predict_risk.html')
+
 # ===== API：单样本预测 =====
 @app.route('/api/predict/single', methods=['POST'])
 def api_predict_single():
@@ -128,6 +133,60 @@ def api_predict_single():
         from src.predict_single import predict_single as ps
         result = ps(features)
         return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ===== API：风险预警 =====
+@app.route('/api/predict/risk', methods=['POST'])
+def api_predict_risk():
+    try:
+        data = request.get_json() or {}
+        threshold = float(data.get('threshold', 0.7))
+
+        model = joblib.load('models/xgboost_model.pkl')
+        X_test = pd.read_csv('data/processed/X_test.csv')
+        y_test = pd.read_csv('data/processed/y_test.csv').values.ravel()
+        string_cols = X_test.select_dtypes(include=['object']).columns.tolist()
+        X_test_num = X_test.drop(columns=string_cols)
+
+        y_prob = model.predict_proba(X_test_num)[:, 1]
+        y_pred = model.predict(X_test_num)
+
+        total_count = len(y_test)
+        high_risk_mask = y_prob >= threshold
+        high_risk_count = int(high_risk_mask.sum())
+        low_risk_count = total_count - high_risk_count
+        risk_rate = high_risk_count / total_count if total_count > 0 else 0
+
+        max_records = 200
+        high_risk_indices = np.where(high_risk_mask)[0]
+        if len(high_risk_indices) > max_records:
+            high_risk_indices = high_risk_indices[:max_records]
+
+        raw = pd.read_csv('data/raw/hotel_bookings.csv')
+        records = []
+        for idx in high_risk_indices:
+            raw_row = raw.iloc[idx] if idx < len(raw) else None
+            records.append({
+                '序号': idx + 1,
+                '酒店类型': raw_row['hotel'] if raw_row is not None else '-',
+                '提前预订天数': int(raw_row['lead_time']) if raw_row is not None else '-',
+                'ADR': round(raw_row['adr'], 2) if raw_row is not None else '-',
+                '押金类型': raw_row['deposit_type'] if raw_row is not None else '-',
+                '市场细分': raw_row['market_segment'] if raw_row is not None else '-',
+                '入住人数': int(raw_row['adults'] + raw_row.get('children', 0) + raw_row.get('babies', 0)) if raw_row is not None else '-',
+                'cancel_probability': round(float(y_prob[idx]), 4),
+                '实际取消': '是' if y_test[idx] == 1 else '否',
+            })
+
+        return jsonify({
+            'success': True,
+            'total_count': total_count,
+            'high_risk_count': high_risk_count,
+            'low_risk_count': low_risk_count,
+            'risk_rate': risk_rate,
+            'records': records,
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
