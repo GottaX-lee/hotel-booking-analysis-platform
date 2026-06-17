@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block nav_dashboard %}active{% endblock %}
+{% block title %}数据看板 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-bar-chart-line"></i> 数据看板</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card kpi-card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-white-50">总订单数</h6>
+                <h2 class="card-title mb-0">{{ kpi.total_orders }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card kpi-card bg-danger text-white h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-white-50">取消率</h6>
+                <h2 class="card-title mb-0">{{ kpi.cancel_rate }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card kpi-card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-white-50">平均房价 (ADR)</h6>
+                <h2 class="card-title mb-0">{{ kpi.avg_adr }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card kpi-card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <h6 class="card-subtitle mb-2 text-dark-50">平均提前预订天数</h6>
+                <h2 class="card-title mb-0">{{ kpi.avg_lead_time }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="chart-section mb-4">
+    <h4 class="mb-3"><i class="bi bi-image"></i> 静态可视化图表</h4>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">KPI 概览卡片</h6>
+                <img src="/static/images/kpi_cards.png" class="img-fluid" alt="KPI 卡片">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">按酒店类型的取消率对比</h6>
+                <img src="/static/images/cancel_rate_by_hotel.png" class="img-fluid" alt="取消率对比">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">按月聚合的取消率趋势</h6>
+                <img src="/static/images/monthly_cancel_trend.png" class="img-fluid" alt="时间趋势">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">特征分布直方图</h6>
+                <img src="/static/images/feature_distributions.png" class="img-fluid" alt="特征分布">
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">相关性热力图</h6>
+                <img src="/static/images/correlation_heatmap.png" class="img-fluid" alt="相关性热力图" style="max-height: 500px; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="chart-section">
+    <h4 class="mb-3"><i class="bi bi-hand-index-thumb"></i> 交互式可视化图表</h4>
+    <div class="row g-3">
+        <div class="col-md-12">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">KPI 指标卡片</h6>
+                <iframe src="/static/html/kpi_cards.html" height="520" title="KPI 卡片"></iframe>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">取消率对比（可悬停）</h6>
+                <iframe src="/static/html/cancel_rate_by_hotel.html" height="520" title="取消率对比"></iframe>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">取消率趋势（带滑块）</h6>
+                <iframe src="/static/html/monthly_cancel_trend.html" height="570" title="时间趋势"></iframe>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">特征分布直方图</h6>
+                <iframe src="/static/html/feature_distributions.html" height="470" title="特征分布"></iframe>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h6 class="text-center mb-3 text-muted">相关性热力图</h6>
+                <iframe src="/static/html/correlation_heatmap.html" height="470" title="相关性"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
