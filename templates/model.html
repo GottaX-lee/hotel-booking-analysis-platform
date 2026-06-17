@@ -165,4 +165,72 @@
     <h6 class="text-center mb-3 text-muted">训练过程 Loss 曲线与准确率曲线（2x2 子图）</h6>
     <img src="/static/images/training_history.png" class="img-fluid" alt="训练历史图" style="max-width: 100%;">
 </div>
+
+<!-- 模型对比区域 -->
+<h4 class="mb-3 mt-5 page-header"><i class="bi bi-bar-chart"></i> XGBoost vs 神经网络 模型对比</h4>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0"><i class="bi bi-table"></i> 性能指标对比</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0 text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>模型</th>
+                        <th>准确率 (Accuracy)</th>
+                        <th>ROC-AUC</th>
+                        <th>算法类型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table-success">
+                        <td><strong>XGBoost (优化模型)</strong></td>
+                        <td><strong>0.8818</strong></td>
+                        <td><strong>0.9543</strong></td>
+                        <td>梯度提升树</td>
+                    </tr>
+                    <tr class="table-info">
+                        <td><strong>PyTorch 神经网络</strong></td>
+                        <td>0.7455</td>
+                        <td>0.8428</td>
+                        <td>多层感知机 (256-128-64)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="chart-container">
+            <iframe src="/static/html/model_comparison.html" height="520" title="模型对比"></iframe>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-warning h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-pencil-square"></i> 结论（待填写）</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted"><em>请在此处填写模型对比的最终结论...</em></p>
+                <hr>
+                <p><strong>XGBoost 优势：</strong></p>
+                <ul>
+                    <li>准确率比神经网络高 +0.1363</li>
+                    <li>AUC 比神经网络高 +0.1115</li>
+                    <li>训练速度快，无需 GPU</li>
+                </ul>
+                <p><strong>神经网络优势：</strong></p>
+                <ul>
+                    <li>可扩展性强，易于添加新层</li>
+                    <li>端到端学习，无需手动特征工程</li>
+                    <li>适合大规模数据场景</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
