@@ -115,6 +115,22 @@ def model():
 def predict():
     return render_template('predict.html')
 
+# ===== 路由：单样本预测页 =====
+@app.route('/predict/single')
+def predict_single():
+    return render_template('predict_single.html')
+
+# ===== API：单样本预测 =====
+@app.route('/api/predict/single', methods=['POST'])
+def api_predict_single():
+    try:
+        features = request.get_json()
+        from src.predict_single import predict_single as ps
+        result = ps(features)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ===== 路由：上传预测 =====
 @app.route('/predict/upload', methods=['POST'])
 def predict_upload():

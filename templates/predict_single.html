@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block nav_single %}active{% endblock %}
+{% block title %}单样本预测 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-sliders"></i> 单样本预测</h2>
+
+<div class="alert alert-info">
+    <strong><i class="bi bi-info-circle"></i> 说明：</strong>
+    拖动下方滑块或选择下拉框值，模拟一条酒店预订记录，实时查看取消预测结果。
+</div>
+
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-toggles"></i> 特征参数设置</h5>
+            </div>
+            <div class="card-body" style="max-height: 650px; overflow-y: auto;">
+                <form id="predictForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">酒店类型</label>
+                            <select class="form-select" id="hotel">
+                                <option value="City Hotel">City Hotel</option>
+                                <option value="Resort Hotel" selected>Resort Hotel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">押金类型</label>
+                            <select class="form-select" id="deposit_type">
+                                <option value="No Deposit" selected>No Deposit</option>
+                                <option value="Non Refund">Non Refund</option>
+                                <option value="Refundable">Refundable</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">市场细分</label>
+                            <select class="form-select" id="market_segment">
+                                <option value="Online TA" selected>Online TA</option>
+                                <option value="Offline TA/TO">Offline TA/TO</option>
+                                <option value="Direct">Direct</option>
+                                <option value="Corporate">Corporate</option>
+                                <option value="Groups">Groups</option>
+                                <option value="Aviation">Aviation</option>
+                                <option value="Complementary">Complementary</option>
+                                <option value="Undefined">Undefined</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">客户类型</label>
+                            <select class="form-select" id="customer_type">
+                                <option value="Transient" selected>Transient</option>
+                                <option value="Transient-Party">Transient-Party</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Group">Group</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">餐食类型</label>
+                            <select class="form-select" id="meal">
+                                <option value="BB" selected>BB</option>
+                                <option value="FB">FB</option>
+                                <option value="HB">HB</option>
+                                <option value="SC">SC</option>
+                                <option value="Undefined">Undefined</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">预订房间类型</label>
+                            <select class="form-select" id="reserved_room_type">
+                                <option value="A" selected>A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="L">L</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">国家</label>
+                            <select class="form-select" id="country">
+                                <option value="PRT" selected>PRT (葡萄牙)</option>
+                                <option value="GBR">GBR (英国)</option>
+                                <option value="FRA">FRA (法国)</option>
+                                <option value="ESP">ESP (西班牙)</option>
+                                <option value="DEU">DEU (德国)</option>
+                                <option value="ITA">ITA (意大利)</option>
+                                <option value="USA">USA (美国)</option>
+                                <option value="CHN">CHN (中国)</option>
+                                <option value="BRA">BRA (巴西)</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">分配房间类型</label>
+                            <select class="form-select" id="assigned_room_type">
+                                <option value="A" selected>A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="F">F</option>
+                                <option value="G">G</option>
+                                <option value="H">H</option>
+                                <option value="I">I</option>
+                                <option value="K">K</option>
+                                <option value="L">L</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">分销渠道</label>
+                            <select class="form-select" id="distribution_channel">
+                                <option value="TA/TO" selected>TA/TO</option>
+                                <option value="Direct">Direct</option>
+                                <option value="Corporate">Corporate</option>
+                                <option value="GDS">GDS</option>
+                                <option value="Undefined">Undefined</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">提前预订天数: <span id="lead_time_val">200</span></label>
+                            <input type="range" class="form-range" id="lead_time" min="0" max="737" value="200" oninput="document.getElementById('lead_time_val').textContent=this.value">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">日均房价 (ADR): <span id="adr_val">100</span></label>
+                            <input type="range" class="form-range" id="adr" min="0" max="500" value="100" step="5" oninput="document.getElementById('adr_val').textContent=this.value">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">入住人数: <span id="total_guests_val">2</span></label>
+                            <input type="range" class="form-range" id="total_guests" min="1" max="10" value="2" oninput="document.getElementById('total_guests_val').textContent=this.value">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">入住晚数: <span id="total_stay_val">3</span></label>
+                            <input type="range" class="form-range" id="total_stay" min="1" max="69" value="3" oninput="document.getElementById('total_stay_val').textContent=this.value">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">特殊要求数: <span id="total_of_special_requests_val">0</span></label>
+                            <input type="range" class="form-range" id="total_of_special_requests" min="0" max="5" value="0" oninput="document.getElementById('total_of_special_requests_val').textContent=this.value">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">历史取消次数: <span id="previous_cancellations_val">0</span></label>
+                            <input type="range" class="form-range" id="previous_cancellations" min="0" max="25" value="0" oninput="document.getElementById('previous_cancellations_val').textContent=this.value">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">入住年份</label>
+                            <select class="form-select" id="arrival_date_year">
+                                <option value="2015">2015</option>
+                                <option value="2016" selected>2016</option>
+                                <option value="2017">2017</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">入住月份</label>
+                            <select class="form-select" id="arrival_date_month">
+                                <option value="January">1月</option>
+                                <option value="February">2月</option>
+                                <option value="March">3月</option>
+                                <option value="April">4月</option>
+                                <option value="May">5月</option>
+                                <option value="June">6月</option>
+                                <option value="July" selected>7月</option>
+                                <option value="August">8月</option>
+                                <option value="September">9月</option>
+                                <option value="October">10月</option>
+                                <option value="November">11月</option>
+                                <option value="December">12月</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">停车位需求</label>
+                            <select class="form-select" id="required_car_parking_spaces">
+                                <option value="0" selected>不需要</option>
+                                <option value="1">需要</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">是否重复客户</label>
+                            <select class="form-select" id="is_repeated_guest">
+                                <option value="0" selected>否</option>
+                                <option value="1">是</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">订房变更次数: <span id="booking_changes_val">0</span></label>
+                            <input type="range" class="form-range" id="booking_changes" min="0" max="10" value="0" oninput="document.getElementById('booking_changes_val').textContent=this.value">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary w-100 btn-lg" onclick="predictSingle()">
+                    <i class="bi bi-magic"></i> 开始预测
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card" id="resultCard" style="display:none;">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> 预测结果</h5>
+            </div>
+            <div class="card-body text-center">
+                <div id="resultBadge" class="mb-3"></div>
+                <div id="resultProbability" class="mb-3"></div>
+                <div id="resultDetails" class="text-start small text-muted mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card" id="loadingCard" style="display:none;">
+            <div class="card-body text-center">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">正在预测...</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> 使用提示</h5>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0 small">
+                    <li>拖动滑块调整特征值</li>
+                    <li>下拉框选择类别特征</li>
+                    <li>点击"开始预测"查看结果</li>
+                    <li><strong>deposit_type</strong> 是影响取消的最重要特征</li>
+                    <li>收取押金的订单取消率极低</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function predictSingle() {
+    document.getElementById('loadingCard').style.display = 'block';
+    document.getElementById('resultCard').style.display = 'none';
+
+    const features = {
+        hotel: document.getElementById('hotel').value,
+        lead_time: parseFloat(document.getElementById('lead_time').value),
+        adr: parseFloat(document.getElementById('adr').value),
+        total_guests: parseFloat(document.getElementById('total_guests').value),
+        total_stay: parseFloat(document.getElementById('total_stay').value),
+        total_of_special_requests: parseFloat(document.getElementById('total_of_special_requests').value),
+        previous_cancellations: parseFloat(document.getElementById('previous_cancellations').value),
+        booking_changes: parseFloat(document.getElementById('booking_changes').value),
+        arrival_date_year: parseInt(document.getElementById('arrival_date_year').value),
+        arrival_date_month: document.getElementById('arrival_date_month').value,
+        market_segment: document.getElementById('market_segment').value,
+        deposit_type: document.getElementById('deposit_type').value,
+        customer_type: document.getElementById('customer_type').value,
+        meal: document.getElementById('meal').value,
+        country: document.getElementById('country').value,
+        reserved_room_type: document.getElementById('reserved_room_type').value,
+        assigned_room_type: document.getElementById('assigned_room_type').value,
+        distribution_channel: document.getElementById('distribution_channel').value,
+        required_car_parking_spaces: parseInt(document.getElementById('required_car_parking_spaces').value),
+        is_repeated_guest: parseInt(document.getElementById('is_repeated_guest').value),
+        stays_in_weekend_nights: 1,
+        stays_in_week_nights: Math.max(1, parseFloat(document.getElementById('total_stay').value) - 1),
+        adults: Math.min(parseFloat(document.getElementById('total_guests').value), 4),
+        children: 0,
+        babies: 0,
+        agent: 0,
+        arrival_date_week_number: 27,
+        arrival_date_day_of_month: 15,
+        previous_bookings_not_canceled: 0,
+        days_in_waiting_list: 0,
+    };
+
+    fetch('/api/predict/single', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(features),
+    })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('loadingCard').style.display = 'none';
+
+        const badge = document.getElementById('resultBadge');
+        const prob = document.getElementById('resultProbability');
+        const details = document.getElementById('resultDetails');
+
+        if (data.prediction === 1) {
+            badge.innerHTML = '<div class="display-1 text-danger">&#10060;</div><h3 class="text-danger">预测：取消</h3>';
+        } else {
+            badge.innerHTML = '<div class="display-1 text-success">&#9989;</div><h3 class="text-success">预测：不取消</h3>';
+        }
+
+        prob.innerHTML = `
+            <div class="progress" style="height: 30px;">
+                <div class="progress-bar ${data.prediction === 1 ? 'bg-danger' : 'bg-success'}"
+                     style="width: ${(data.probability * 100).toFixed(1)}%">
+                    取消概率: ${(data.probability * 100).toFixed(1)}%
+                </div>
+            </div>
+            <p class="mt-2">未取消概率: ${((1 - data.probability) * 100).toFixed(1)}%</p>
+        `;
+
+        const leadTime = document.getElementById('lead_time').value;
+        const adr = document.getElementById('adr').value;
+        const depType = document.getElementById('deposit_type').value;
+        details.innerHTML = `
+            <strong>输入特征摘要：</strong><br>
+            酒店: ${document.getElementById('hotel').value} | 押金: ${depType}<br>
+            提前 ${leadTime} 天预订 | ADR: ¥${adr} | 入住 ${document.getElementById('total_stay').value} 晚
+        `;
+
+        document.getElementById('resultCard').style.display = 'block';
+    })
+    .catch(err => {
+        document.getElementById('loadingCard').style.display = 'none';
+        alert('预测失败: ' + err.message);
+    });
+}
+</script>
+{% endblock %}
