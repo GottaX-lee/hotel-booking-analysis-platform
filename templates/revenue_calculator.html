@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block nav_revenue %}active{% endblock %}
+{% block title %}收益计算 - 酒店预订数据分析平台{% endblock %}
+{% block content %}
+<h2 class="mb-4 page-header"><i class="bi bi-calculator"></i> 收益影响计算器</h2>
+
+<div class="alert alert-success">
+    <strong><i class="bi bi-info-circle"></i> 说明：</strong>
+    基于数据集实际统计值，模拟降低取消率对酒店收益的影响。调整右侧参数，实时查看节支增效效果。
+</div>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="bi bi-sliders"></i> 参数设置</h5>
+            </div>
+            <div class="card-body" style="max-height: 550px; overflow-y: auto;">
+                <form id="revenueForm">
+                    <div class="mb-3">
+                        <label class="form-label">总订单数: <strong><span id="tb_v">117,427</span></strong></label>
+                        <input type="range" class="form-range" id="total_bookings" min="10000" max="500000" value="117427" step="1000"
+                               oninput="document.getElementById('tb_v').textContent=Number(this.value).toLocaleString();calcRevenue()">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">平均房价 ADR: <strong>¥<span id="adr_v">103.48</span></strong></label>
+                        <input type="range" class="form-range" id="avg_adr" min="50" max="300" value="103.48" step="0.5"
+                               oninput="document.getElementById('adr_v').textContent=this.value;calcRevenue()">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">平均入住晚数: <strong><span id="nights_v">3.5</span></strong></label>
+                        <input type="range" class="form-range" id="avg_stay_nights" min="1" max="10" value="3.5" step="0.5"
+                               oninput="document.getElementById('nights_v').textContent=this.value;calcRevenue()">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">当前取消率: <strong><span id="ccr_v">37.48</span>%</strong></label>
+                        <input type="range" class="form-range" id="current_cancel_rate" min="10" max="60" value="37.48" step="0.5"
+                               oninput="document.getElementById('ccr_v').textContent=this.value;calcRevenue()">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-success fw-bold">目标取消率: <strong><span id="tcr_v">30.00</span>%</strong></label>
+                        <input type="range" class="form-range" id="target_cancel_rate" min="5" max="50" value="30" step="0.5"
+                               oninput="document.getElementById('tcr_v').textContent=this.value;calcRevenue()">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">每单干预成本: <strong>¥<span id="ic_v">5.00</span></strong></label>
+                        <input type="range" class="form-range" id="intervention_cost_per_booking" min="0" max="50" value="5" step="0.5"
+                               oninput="document.getElementById('ic_v').textContent=this.value;calcRevenue()">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">每次取消超订成本: <strong>¥<span id="oc_v">50.00</span></strong></label>
+                        <input type="range" class="form-range" id="overbook_cost_per_cancel" min="0" max="500" value="50" step="5"
+                               oninput="document.getElementById('oc_v').textContent=this.value;calcRevenue()">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div id="loadingSpinner" class="text-center" style="display:none;">
+            <div class="spinner-border text-success" role="status"></div>
+        </div>
+
+        <div id="resultArea">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <div class="card bg-danger text-white text-center h-100">
+                        <div class="card-body py-3">
+                            <h6>当前取消损失</h6>
+                            <h3 id="curLoss" class="mb-0">-</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-warning text-dark text-center h-100">
+                        <div class="card-body py-3">
+                            <h6>干预后损失</h6>
+                            <h3 id="tgtLoss" class="mb-0">-</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white text-center h-100">
+                        <div class="card-body py-3">
+                            <h6>净收益提升</h6>
+                            <h3 id="netGain" class="mb-0">-</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="bi bi-table"></i> 详细对比</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered mb-0 text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>指标</th>
+                                    <th>当前</th>
+                                    <th class="table-success">干预后</th>
+                                    <th class="table-info">节省</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>取消数量</td>
+                                    <td id="curCan">-</td>
+                                    <td id="tgtCan" class="table-success">-</td>
+                                    <td id="savCan" class="table-info fw-bold">-</td>
+                                </tr>
+                                <tr>
+                                    <td>收入损失</td>
+                                    <td id="curRevLoss">-</td>
+                                    <td id="tgtRevLoss" class="table-success">-</td>
+                                    <td id="savRevLoss" class="table-info fw-bold">-</td>
+                                </tr>
+                                <tr>
+                                    <td>超订成本</td>
+                                    <td id="curOverLoss">-</td>
+                                    <td id="tgtOverLoss" class="table-success">-</td>
+                                    <td id="savOverLoss" class="table-info fw-bold">-</td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td><strong>总损失</strong></td>
+                                    <td id="curTotal"><strong>-</strong></td>
+                                    <td id="tgtTotal"><strong>-</strong></td>
+                                    <td id="savTotal"><strong>-</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> 投资回报分析</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6 class="text-muted">干预总成本</h6>
+                                <h4 id="intCost" class="text-warning mb-0">-</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6 class="text-muted">净收益</h6>
+                                <h4 id="netGain2" class="text-success mb-0">-</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-light rounded">
+                                <h6 class="text-muted">ROI</h6>
+                                <h4 id="roiVal" class="text-primary mb-0">-</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="progress" style="height: 30px;">
+                            <div class="progress-bar bg-success" id="roiBar" style="width: 0%">
+                                净收益占收入比
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function formatCurrency(v) {
+    return '\u00a5' + Number(v).toLocaleString('zh-CN', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+
+function getParams() {
+    return {
+        total_bookings: parseFloat(document.getElementById('total_bookings').value),
+        avg_adr: parseFloat(document.getElementById('avg_adr').value),
+        avg_stay_nights: parseFloat(document.getElementById('avg_stay_nights').value),
+        current_cancel_rate: parseFloat(document.getElementById('current_cancel_rate').value) / 100,
+        target_cancel_rate: parseFloat(document.getElementById('target_cancel_rate').value) / 100,
+        intervention_cost_per_booking: parseFloat(document.getElementById('intervention_cost_per_booking').value),
+        overbook_cost_per_cancel: parseFloat(document.getElementById('overbook_cost_per_cancel').value),
+    };
+}
+
+function calcRevenue() {
+    document.getElementById('loadingSpinner').style.display = 'block';
+    fetch('/api/revenue', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(getParams()),
+    })
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        if (d.error) return;
+        const cur = d.current, tgt = d.target, sav = d.savings;
+        document.getElementById('curLoss').textContent = formatCurrency(cur.total_loss);
+        document.getElementById('tgtLoss').textContent = formatCurrency(tgt.total_loss);
+        document.getElementById('netGain').textContent = formatCurrency(sav.net_gain);
+
+        document.getElementById('curCan').textContent = cur.cancellations.toLocaleString();
+        document.getElementById('tgtCan').textContent = tgt.cancellations.toLocaleString();
+        document.getElementById('savCan').textContent = '+' + sav.cancellations_reduced.toLocaleString();
+        document.getElementById('curRevLoss').textContent = formatCurrency(cur.revenue_loss);
+        document.getElementById('tgtRevLoss').textContent = formatCurrency(tgt.revenue_loss);
+        document.getElementById('savRevLoss').textContent = formatCurrency(sav.revenue_saved);
+        document.getElementById('curOverLoss').textContent = formatCurrency(cur.overbook_loss);
+        document.getElementById('tgtOverLoss').textContent = formatCurrency(tgt.overbook_loss);
+        document.getElementById('savOverLoss').textContent = formatCurrency(sav.overbook_saved);
+        document.getElementById('curTotal').innerHTML = '<strong>' + formatCurrency(cur.total_loss) + '</strong>';
+        document.getElementById('tgtTotal').innerHTML = '<strong>' + formatCurrency(tgt.total_loss) + '</strong>';
+        document.getElementById('savTotal').innerHTML = '<strong>' + formatCurrency(sav.revenue_saved + sav.overbook_saved) + '</strong>';
+
+        document.getElementById('intCost').textContent = formatCurrency(sav.total_intervention_cost);
+        document.getElementById('netGain2').textContent = formatCurrency(sav.net_gain);
+        document.getElementById('roiVal').textContent = sav.roi_formatted;
+        document.getElementById('roiBar').style.width = Math.min(Math.abs(sav.roi), 200) + '%';
+        document.getElementById('roiBar').textContent = 'ROI: ' + sav.roi_formatted;
+    })
+    .catch(err => {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        console.error(err);
+    });
+}
+
+window.addEventListener('load', calcRevenue);
+</script>
+{% endblock %}

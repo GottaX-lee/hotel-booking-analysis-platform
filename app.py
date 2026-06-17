@@ -130,6 +130,11 @@ def predict_risk():
 def simulator():
     return render_template('simulator.html')
 
+# ===== 路由：收益计算页 =====
+@app.route('/revenue')
+def revenue():
+    return render_template('revenue_calculator.html')
+
 # ===== API：场景模拟 =====
 @app.route('/api/simulator', methods=['POST'])
 def api_simulator():
@@ -139,6 +144,17 @@ def api_simulator():
         base = get_default_scenario()
         modified = data.get('scenario_b', base)
         result = run_simulation(base, modified)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ===== API：收益计算 =====
+@app.route('/api/revenue', methods=['POST'])
+def api_revenue():
+    try:
+        from src.revenue_calculator import calculate_revenue
+        data = request.get_json() or {}
+        result = calculate_revenue(data)
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
