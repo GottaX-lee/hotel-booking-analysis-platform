@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+hotel-app.zip
+batch_sample.csv
+data/processed/monthly_bookings.csv
+data/results/

@@ -8,10 +8,12 @@ resources:
       region: cn-hangzhou
       functionName: hotel-booking-analysis
       description: 'Hotel Booking Analysis Platform'
-      runtime: python3.9
+      runtime: custom.debian10
       code: ./
-      handler: app.handler
       memorySize: 1024
-      timeout: 120
+      timeout: 300
+      instanceConcurrency: 1
+      internetAccess: true
       environmentVariables:
-        PATH: /code/.venv/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        PYTHONPATH: /code
+        FC_SERVER_PORT: '9000'
