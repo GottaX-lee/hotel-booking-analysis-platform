@@ -1,25 +1,17 @@
 ================================================================================
   酒店预订需求智能数据分析与可视化平台
-  — GitHub 项目提交说明
+                                                                   — GitHub 项目提交说明
 ================================================================================
 
 【GitHub 仓库地址】
 https://github.com/GottaX-lee/hotel-booking-analysis-platform
 
-【使用方法】
-方式一：本地部署（推荐，体验完整功能）
-  1. git clone https://github.com/GottaX-lee/hotel-booking-analysis-platform.git
-  2. cd hotel-booking-analysis-platform
-  3. pip install -r requirements.txt  （或 pip install xgboost shap torch -i https://pypi.tuna.tsinghua.edu.cn/simple）
-  4. python app.py
-  5. 浏览器打开 http://localhost:5000
-
-方式二：阿里云函数计算部署
-  1. 下载仓库的 ZIP 包
-  2. 在 FC 控制台创建函数，选"自定义运行时 Debian 10"
-  3. 上传 ZIP，启动命令填 ./bootstrap
-  4. 监听端口 9000，内存建议 1GB 以上
-  5. 部署完成后访问公网地址
+本地部署
+1. git clone https://github.com/GottaX-lee/hotel-booking-analysis-platform.git
+2. cd hotel-booking-analysis-platform
+3. pip install -r requirements.txt  （或 pip install xgboost shap torch -i https://pypi.tuna.tsinghua.edu.cn/simple）
+4. python app.py
+5. 浏览器打开 http://localhost:5000
 
 【测试数据】
 仓库根目录下的 batch_sample.csv 包含 20 条示例数据，可直接用于测试批量预测功能。
@@ -63,7 +55,7 @@ https://github.com/GottaX-lee/hotel-booking-analysis-platform
             未来 12 个月的订单量和取消率
 
 ================================================================================
-三、与《神经网络与深度学习》课程的关联
+三、与《神经网络与深度学习》的关联
 ================================================================================
 
 本项目的多项技术选择与课程内容紧密对应，可直接作为课程大作业或期末项目：
@@ -91,7 +83,7 @@ https://github.com/GottaX-lee/hotel-booking-analysis-platform
    与课程关联：展示实际项目中数据质量对模型性能的关键影响
 
 ================================================================================
-四、项目特色与创新点（适合答辩展示）
+四、项目特色与创新点
 ================================================================================
 
 1. 数据泄露危害量化对照实验
@@ -188,4 +180,5 @@ Web 框架：Flask 3.0
 
 项目名称：酒店预订需求智能数据分析与可视化平台
 课程名称：神经网络与深度学习
-提交日期：2026年6月
+项目负责人：2023113846+尚波成
+提交日期：2026年6月18日
